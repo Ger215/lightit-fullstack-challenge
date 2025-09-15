@@ -1,0 +1,1 @@
+# lightit-fullstack-challenge
