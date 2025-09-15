@@ -17,6 +17,8 @@ export class PatientsService {
     data: CreatePatientDto,
     file: File,
   ): Promise<Patient> {
+    this.checkIfPhotoIsUploaded(file);
+
     const uploadPath = './uploads';
     this.checkIfPathExists(uploadPath);
 
@@ -32,6 +34,12 @@ export class PatientsService {
         }
       }
       throw new BadRequestException(error.message);
+    }
+  }
+
+  private checkIfPhotoIsUploaded(file: File) {
+    if (!file) {
+      throw new BadRequestException('Document photo is required');
     }
   }
 
