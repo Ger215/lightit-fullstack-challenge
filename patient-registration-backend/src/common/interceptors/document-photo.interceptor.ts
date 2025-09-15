@@ -2,6 +2,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { BadRequestException } from '@nestjs/common';
 
 export const DocumentPhotoInterceptor = FileInterceptor('documentPhoto', {
   storage: diskStorage({
@@ -19,7 +20,7 @@ export const DocumentPhotoInterceptor = FileInterceptor('documentPhoto', {
   }),
   fileFilter: (req, file, cb) => {
     if (!file.originalname.match(/\.jpg$/)) {
-      return cb(new Error('Only .jpg files are allowed!'), false);
+      return cb(new BadRequestException('Only .jpg files are allowed!'), false);
     }
     cb(null, true);
   },
