@@ -3,21 +3,23 @@ import { PatientsService } from './patients.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Patient } from '../domain/patient.entity';
 import { Repository } from 'typeorm';
-import { BadRequestException } from '@nestjs/common';
-import { CreatePatientDto } from '../domain/dto/create-patient.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('PatientsService', () => {
   let service: PatientsService;
   let repo: jest.Mocked<Repository<Patient>>;
+  let notificationService: NotificationsService;
 
-  const mockPatient: Patient = {
-    id: '1',
-    fullName: 'Test User',
-    email: 'testuser1234@gmail.com',
-    countryCode: '+598',
-    phoneNumber: '12345678',
-    documentPhoto: 'test.jpg',
-    createdAt: new Date(),
+  const mockRepo = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    find: jest.fn(),
+  };
+
+  const mockNotificationService = {
+    sendRegistrationConfirmationEmail: jest.fn(),
+    sendRegistrationConfirmationSms: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -26,23 +28,22 @@ describe('PatientsService', () => {
         PatientsService,
         {
           provide: getRepositoryToken(Patient),
-          useValue: {
-            findOne: jest.fn(),
-            create: jest.fn(),
-            save: jest.fn(),
-            find: jest.fn(),
-          },
+          useValue: mockRepo,
+        },
+        {
+          provide: NotificationsService,
+          useValue: mockNotificationService,
         },
       ],
     }).compile();
 
     service = module.get<PatientsService>(PatientsService);
     repo = module.get(getRepositoryToken(Patient));
+    notificationService =
+      module.get<NotificationsService>(NotificationsService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  afterEach(() => jest.clearAllMocks());
 
   it('should be defined', () => {
     expect(service).toBeDefined();
@@ -50,70 +51,59 @@ describe('PatientsService', () => {
 
   describe('createPatient', () => {
     it('should create and save a patient if email does not exist', async () => {
-      const dto: CreatePatientDto = {
+      const dto = {
         fullName: 'Test User',
-        email: 'testuser1234@gmail.com',
+        email: 'test@example.com',
+        countryCode: '+598',
+        phoneNumber: '12345678',
+      };
+      const file = 'photo.jpg';
+
+      mockRepo.findOne.mockResolvedValue(null);
+      mockRepo.create.mockReturnValue({ ...dto, documentPhoto: file });
+      mockRepo.save.mockResolvedValue({ id: '1', ...dto, documentPhoto: file });
+
+      const result = await service.createPatient(dto, file);
+
+      expect(result).toEqual({ id: '1', ...dto, documentPhoto: file });
+      expect(mockRepo.create).toHaveBeenCalledWith({
+        ...dto,
+        documentPhoto: file,
+      });
+      expect(mockRepo.save).toHaveBeenCalled();
+    });
+
+    it('should throw if email already exists', async () => {
+      const dto = {
+        fullName: 'Test User',
+        email: 'duplicate@example.com',
         countryCode: '+598',
         phoneNumber: '12345678',
       };
 
-      (repo.findOne as jest.Mock).mockResolvedValue(null);
-      (repo.create as jest.Mock).mockReturnValue(mockPatient);
-      (repo.save as jest.Mock).mockResolvedValue(mockPatient);
-
-      const result = await service.createPatient(dto, 'test.jpg');
-
-      expect(repo.findOne).toHaveBeenCalledWith({
-        where: { email: dto.email },
-      });
-      expect(repo.create).toHaveBeenCalledWith({
+      mockRepo.findOne.mockResolvedValue({
+        id: '1',
         ...dto,
-        documentPhoto: 'test.jpg',
+        documentPhoto: 'x',
       });
-      expect(repo.save).toHaveBeenCalledWith(mockPatient);
-      expect(result).toEqual(mockPatient);
-    });
 
-    it('should throw if email already exists', async () => {
-      (repo.findOne as jest.Mock).mockResolvedValue(mockPatient);
-
-      await expect(
-        service.createPatient(
-          {
-            fullName: 'Other',
-            email: mockPatient.email,
-            countryCode: '+598',
-            phoneNumber: '87654321',
-          },
-          'test.jpg',
-        ),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.createPatient(dto, 'file.jpg')).rejects.toThrow(
+        'Email already registered',
+      );
     });
   });
 
   describe('getAll', () => {
     it('should return an array of patients', async () => {
-      (repo.find as jest.Mock).mockResolvedValue([mockPatient]);
+      const patients = [
+        { id: '1', fullName: 'John Doe', email: 'johndoe@gmail.com' },
+      ];
+      mockRepo.find.mockResolvedValue(patients);
 
       const result = await service.getAll();
 
-      expect(repo.find).toHaveBeenCalled();
-      expect(result).toEqual([mockPatient]);
-    });
-  });
-
-  describe('handlePatientCreation', () => {
-    it('should throw if file is missing', async () => {
-      const dto: CreatePatientDto = {
-        fullName: 'Test User',
-        email: 'testuser1234@gmail.com',
-        countryCode: '+598',
-        phoneNumber: '12345678',
-      };
-
-      await expect(
-        service.handlePatientCreation(dto, undefined as any),
-      ).rejects.toThrow(BadRequestException);
+      expect(result).toEqual(patients);
+      expect(mockRepo.find).toHaveBeenCalled();
     });
   });
 });

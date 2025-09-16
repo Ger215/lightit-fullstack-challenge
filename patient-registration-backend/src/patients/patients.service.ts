@@ -5,12 +5,14 @@ import { Patient } from '../domain/patient.entity';
 import { CreatePatientDto } from '../domain/dto/create-patient.dto';
 import type { File } from 'multer';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PatientsService {
   constructor(
     @InjectRepository(Patient)
     private patientsRepo: Repository<Patient>,
+    private readonly notificationService: NotificationsService,
   ) {}
 
   async handlePatientCreation(
@@ -24,6 +26,11 @@ export class PatientsService {
 
     try {
       const patient = await this.createPatient(data, file.filename);
+
+      this.notificationService
+        .sendRegistrationConfirmationEmail(patient.email, patient.fullName)
+        .catch((err) => console.error('Error sending email:', err));
+
       return patient;
     } catch (error) {
       if (file?.path) {
