@@ -7,13 +7,18 @@ import {
   goToNextPage,
   goToPreviousPage,
 } from '../services/paginationService';
+import { searchPatients } from '../services/searchService';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import {
+  ExclamationCircleIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/react/24/outline';
 
 export function PatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const patientsPerPage = 5;
 
@@ -32,8 +37,10 @@ export function PatientsPage() {
     fetchPatients();
   }, []);
 
+  const filteredPatients = searchPatients(patients, searchTerm);
+
   const { paginatedData: paginatedPatients, totalPages } = paginate(
-    patients,
+    filteredPatients,
     currentPage,
     patientsPerPage
   );
@@ -71,15 +78,29 @@ export function PatientsPage() {
       <div className="w-full max-w-4xl mx-auto px-4 pt-10">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Patients</h1>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <button className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
             + Add Patient
           </button>
         </div>
 
+        <div className="relative mb-6 max-w-md">
+          <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400 h-5 w-5" />
+          <input
+            type="text"
+            placeholder="Search Patient"
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white shadow-md border border-gray-200 placeholder-gray-400 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
+          />
+        </div>
+
         <div
           className={`grid gap-4 ${
-            patients.length >= 4
-              ? 'max-h-[500px] overflow-y-auto pr-2 rounded-lg'
+            filteredPatients.length >= 4
+              ? 'max-h-[600px] overflow-y-auto pr-2 rounded-lg'
               : ''
           }`}
         >
