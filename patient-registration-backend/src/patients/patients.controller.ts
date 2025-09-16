@@ -9,7 +9,7 @@ import {
 import { PatientsService } from './patients.service';
 import { CreatePatientDto } from '../domain/dto/create-patient.dto';
 import type { File } from 'multer';
-import { DocumentPhotoInterceptor } from '../../src/common/interceptors/document-photo.interceptor';
+import { DocumentPhotoInterceptor } from '../common/interceptors/document-photo.interceptor';
 
 @Controller('patients')
 export class PatientsController {

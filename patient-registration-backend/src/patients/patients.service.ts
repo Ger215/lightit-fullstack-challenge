@@ -5,12 +5,14 @@ import { Patient } from '../domain/patient.entity';
 import { CreatePatientDto } from '../domain/dto/create-patient.dto';
 import type { File } from 'multer';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class PatientsService {
   constructor(
     @InjectRepository(Patient)
     private patientsRepo: Repository<Patient>,
+    private readonly mailerService: MailerService,
   ) {}
 
   async handlePatientCreation(
@@ -24,6 +26,11 @@ export class PatientsService {
 
     try {
       const patient = await this.createPatient(data, file.filename);
+
+      this.sendConfirmationEmail(patient).catch((err) =>
+        console.error('Error sending email:', err),
+      );
+
       return patient;
     } catch (error) {
       if (file?.path) {
@@ -35,6 +42,17 @@ export class PatientsService {
       }
       throw new BadRequestException(error.message);
     }
+  }
+
+  private async sendConfirmationEmail(patient: Patient) {
+    await this.mailerService.sendMail({
+      to: patient.email,
+      subject: 'Patient Registration Confirmation',
+      template: 'confirmation',
+      context: {
+        fullName: patient.fullName,
+      },
+    });
   }
 
   private checkIfPhotoIsUploaded(file: File) {
