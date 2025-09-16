@@ -46,7 +46,7 @@ export function PatientCard({ patient }: { patient: Patient }) {
           expanded ? 'max-h-40 mt-4 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="text-md text-gray-700 space-y-2">
+        <div className="text-md text-gray-700 space-y-2 font-onest">
           <p>
             <span className="font-semibold">Email:</span> {patient.email}
           </p>

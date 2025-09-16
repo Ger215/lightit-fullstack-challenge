@@ -49,7 +49,7 @@ export function PatientsPage() {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="w-16 h-16 border-4 border-blue-300 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-gray-600 text-lg mt-4 font-medium">
+        <p className="text-gray-600 text-lg mt-4 font-medium font-onest">
           Loading Patients...
         </p>
       </div>
@@ -60,13 +60,13 @@ export function PatientsPage() {
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-blue-50 to-blue-100 text-center">
         <ExclamationCircleIcon className="h-16 w-16 text-gray-400 mb-4" />
-        <p className="text-gray-700 text-xl font-semibold mb-2">
+        <p className="text-gray-700 text-xl font-semibold font-onest mb-2">
           No patients found
         </p>
-        <p className="text-gray-500 mb-6">
+        <p className="text-gray-500 mb-6 font-onest">
           Add your first patient to get started.
         </p>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium shadow hover:bg-blue-700 transition">
+        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium font-onest shadow hover:bg-blue-700 transition">
           + Add Patient
         </button>
       </div>
@@ -77,8 +77,10 @@ export function PatientsPage() {
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="w-full max-w-4xl mx-auto px-4 pt-10">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Patients</h1>
-          <button className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+          <h1 className="text-3xl font-medium font-onest tracking-tight text-gray-800">
+            Patients
+          </h1>
+          <button className="cursor-pointer font-medium font-onest bg-blue-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
             + Add Patient
           </button>
         </div>
@@ -93,7 +95,7 @@ export function PatientsPage() {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white shadow-md border border-gray-200 placeholder-gray-400 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
+            className="w-full pl-12 pr-4 font-onest py-3 rounded-xl bg-white shadow-md border border-gray-200 placeholder-gray-400 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
           />
         </div>
 
@@ -119,7 +121,7 @@ export function PatientsPage() {
               <ChevronLeftIcon className="w-6 h-6" />
             </button>
 
-            <span className="text-gray-700 font-semibold">
+            <span className="text-gray-700 font-semibold font-onest">
               Page {currentPage} of {totalPages}
             </span>
 
