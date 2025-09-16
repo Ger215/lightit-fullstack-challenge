@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PatientCard } from '../components/patients/PatientCard';
+import { AddPatientForm } from '../components/patients/AddPatientForm';
 import type { Patient } from '../domain/Patient';
 import { getPatients } from '../services/patientsService';
 import {
@@ -19,21 +20,22 @@ export function PatientsPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
   const patientsPerPage = 5;
 
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const data = await getPatients();
-        setPatients(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPatients = async () => {
+    try {
+      const data = await getPatients();
+      setPatients(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPatients();
   }, []);
 
@@ -66,9 +68,21 @@ export function PatientsPage() {
         <p className="text-gray-500 mb-6 font-onest">
           Add your first patient to get started.
         </p>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium font-onest shadow hover:bg-blue-700 transition">
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium font-onest shadow hover:bg-blue-700 transition"
+        >
           + Add Patient
         </button>
+        {showForm && (
+          <AddPatientForm
+            onClose={() => setShowForm(false)}
+            onSuccess={() => {
+              setShowForm(false);
+              fetchPatients();
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -80,7 +94,10 @@ export function PatientsPage() {
           <h1 className="text-3xl font-medium font-onest tracking-tight text-gray-800">
             Patients
           </h1>
-          <button className="cursor-pointer font-medium font-onest bg-blue-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
+          <button
+            onClick={() => setShowForm(true)}
+            className="cursor-pointer font-medium font-onest bg-blue-500 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition"
+          >
             + Add Patient
           </button>
         </div>
@@ -135,6 +152,16 @@ export function PatientsPage() {
               <ChevronRightIcon className="w-6 h-6" />
             </button>
           </div>
+        )}
+
+        {showForm && (
+          <AddPatientForm
+            onClose={() => setShowForm(false)}
+            onSuccess={() => {
+              setShowForm(false);
+              fetchPatients();
+            }}
+          />
         )}
       </div>
     </div>
