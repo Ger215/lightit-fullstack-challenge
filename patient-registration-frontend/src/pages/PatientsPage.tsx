@@ -71,11 +71,11 @@ export function PatientsPage() {
           No patients found
         </p>
         <p className="text-gray-500 mb-6 font-onest">
-          Add your first patient to get started.
+          Add your first Patient to get started.
         </p>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium font-onest shadow hover:bg-blue-700 transition"
+          className="cursor-pointer bg-blue-600 text-white px-6 py-3 rounded-lg font-medium font-onest shadow hover:bg-blue-700 transition"
         >
           + Add Patient
         </button>

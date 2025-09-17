@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { postPatient } from '../../services/patientsService';
 import { PhoneInput } from './PhoneInput';
+import { validatePatientForm } from '../../services/patientValidationService';
 
 type PatientFormProps = {
   onSuccess: () => void;
@@ -22,29 +23,18 @@ export function AddPatientForm({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validate = () => {
-    const newErrors: { [key: string]: string } = {};
-    if (!/^[a-zA-Z\s]+$/.test(fullName)) {
-      newErrors.fullName = 'Full Name must contain only letters.';
-    }
-    if (!/^[\w.+-]+@gmail\.com$/.test(email)) {
-      newErrors.email = 'Only @gmail.com addresses are allowed.';
-    }
-    if (!phoneNumber.match(/^\d+$/)) {
-      newErrors.phoneNumber = 'Phone number must contain only digits.';
-    }
-    if (!file) {
-      newErrors.file = 'Please upload a document photo.';
-    } else if (!file.name.endsWith('.jpg')) {
-      newErrors.file = 'Only .jpg files are allowed.';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+
+    const validationErrors = validatePatientForm({
+      fullName,
+      email,
+      phoneNumber,
+      file,
+    });
+
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
 
     try {
       await postPatient({
