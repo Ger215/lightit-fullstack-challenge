@@ -30,8 +30,9 @@ Testing: Jest
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <url-del-repo>
-cd <carpeta-del-repo>
+git clone https://github.com/Ger215/lightit-fullstack-challenge.git
+
+cd lightit-fullstack-challenge
 ```
 
 ### 2. Instalar Dependencias
