@@ -1,27 +1,25 @@
 import { useState, useRef } from 'react';
-import {
-  ExclamationCircleIcon,
-  CheckCircleIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { postPatient } from '../../services/patientsService';
 import { PhoneInput } from './PhoneInput';
 
 type PatientFormProps = {
   onSuccess: () => void;
+  onFailure: (errorMessage: string) => void;
   onClose: () => void;
 };
 
-export function AddPatientForm({ onSuccess, onClose }: PatientFormProps) {
+export function AddPatientForm({
+  onSuccess,
+  onFailure,
+  onClose,
+}: PatientFormProps) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [backendError, setBackendError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validate = () => {
@@ -47,8 +45,7 @@ export function AddPatientForm({ onSuccess, onClose }: PatientFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    setSubmitting(true);
-    setBackendError(null);
+
     try {
       await postPatient({
         fullName,
@@ -57,21 +54,19 @@ export function AddPatientForm({ onSuccess, onClose }: PatientFormProps) {
         phoneNumber,
         file,
       });
-      setStatus('success');
+
+      onClose();
       onSuccess();
+
       setFullName('');
       setEmail('');
       setCountryCode('');
       setPhoneNumber('');
       setFile(null);
     } catch (error: any) {
-      setStatus('error');
-
       let backendMsg: string = 'Unknown error occurred';
-
       if (error?.response?.data) {
         const data = error.response.data;
-
         if (Array.isArray(data.message)) {
           backendMsg = data.message.join(', ');
         } else if (typeof data.message === 'string') {
@@ -83,13 +78,7 @@ export function AddPatientForm({ onSuccess, onClose }: PatientFormProps) {
         backendMsg = error.message;
       }
 
-      setBackendError(backendMsg);
-    } finally {
-      setSubmitting(false);
-      setTimeout(() => {
-        setStatus('idle');
-        setBackendError(null);
-      }, 4000);
+      onFailure(backendMsg);
     }
   };
 
@@ -175,29 +164,10 @@ export function AddPatientForm({ onSuccess, onClose }: PatientFormProps) {
           )}
           <button
             type="submit"
-            disabled={submitting}
-            className="w-full cursor-pointer bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+            className="w-full cursor-pointer bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
           >
-            {submitting ? 'Submitting...' : 'Add Patient'}
+            Add Patient
           </button>
-
-          {status === 'success' && (
-            <div className="flex items-center justify-center gap-2 font-onest text-green-600 mt-4 animate-bounce">
-              <CheckCircleIcon className="h-7 w-7 text-green-600" />
-              <p className="font-medium">Patient added successfully!</p>
-            </div>
-          )}
-          {status === 'error' && (
-            <div className="flex flex-col items-center justify-center gap-2 font-onest text-red-600 mt-4 animate-pulse">
-              <div className="flex items-center gap-2">
-                <ExclamationCircleIcon className="h-7 w-7 text-red-600" />
-                <p className="font-medium">Failed to add patient</p>
-              </div>
-              {backendError && (
-                <p className="text-sm text-red-500">{backendError}</p>
-              )}
-            </div>
-          )}
         </form>
       </div>
     </div>

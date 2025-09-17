@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { PatientCard } from '../components/patients/PatientCard';
 import { AddPatientForm } from '../components/patients/AddPatientForm';
+import { SuccessModal } from '../../common/SuccessModal';
+import { FailureModal } from '../../common/FailureModal';
 import type { Patient } from '../domain/Patient';
 import { getPatients } from '../services/patientsService';
 import {
@@ -21,6 +23,9 @@ export function PatientsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showFailure, setShowFailure] = useState(false);
+  const [failureMessage, setFailureMessage] = useState('');
 
   const patientsPerPage = 5;
 
@@ -74,13 +79,27 @@ export function PatientsPage() {
         >
           + Add Patient
         </button>
+
         {showForm && (
           <AddPatientForm
             onClose={() => setShowForm(false)}
             onSuccess={() => {
               setShowForm(false);
               fetchPatients();
+              setShowSuccess(true);
             }}
+            onFailure={(msg) => {
+              setFailureMessage(msg);
+              setShowFailure(true);
+            }}
+          />
+        )}
+
+        {showSuccess && <SuccessModal onClose={() => setShowSuccess(false)} />}
+        {showFailure && (
+          <FailureModal
+            message={failureMessage}
+            onClose={() => setShowFailure(false)}
           />
         )}
       </div>
@@ -160,7 +179,20 @@ export function PatientsPage() {
             onSuccess={() => {
               setShowForm(false);
               fetchPatients();
+              setShowSuccess(true);
             }}
+            onFailure={(msg) => {
+              setFailureMessage(msg);
+              setShowFailure(true);
+            }}
+          />
+        )}
+
+        {showSuccess && <SuccessModal onClose={() => setShowSuccess(false)} />}
+        {showFailure && (
+          <FailureModal
+            message={failureMessage}
+            onClose={() => setShowFailure(false)}
           />
         )}
       </div>

@@ -25,7 +25,18 @@ export async function postPatient(data: {
   });
 
   if (!res.ok) {
-    throw new Error('Failed to create patient');
+    let errorMessage = 'Failed to create patient';
+    try {
+      const errorData = await res.json();
+      if (Array.isArray(errorData.message)) {
+        errorMessage = errorData.message.join(', ');
+      } else if (typeof errorData.message === 'string') {
+        errorMessage = errorData.message;
+      } else if (errorData.error) {
+        errorMessage = errorData.error;
+      }
+    } catch (e) {}
+    throw new Error(errorMessage);
   }
 
   return res.json();
